@@ -8,6 +8,7 @@ import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/workout_screen.dart';
+import 'screens/exercise_list_screen.dart';
 import 'services/auth_service.dart';
 
 Future<void> main() async {
@@ -51,6 +52,10 @@ class GymProgressTrackerApp extends StatelessWidget {
           '/signup': (context) => const SignUpScreen(),
           '/home': (context) => const HomeScreen(),
           '/workout': (context) => const WorkoutScreen(),
+          '/exerciseList': (context) {
+            final category = ModalRoute.of(context)!.settings.arguments as String;
+            return ExerciseListScreen(category: category);
+          },
         },
       ),
     );
