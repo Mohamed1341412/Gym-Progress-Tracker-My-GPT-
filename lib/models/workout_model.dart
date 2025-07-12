@@ -59,4 +59,32 @@ class Workout {
         volume: (map['volume'] as num).toDouble(),
         points: (map['points'] as num).toDouble(),
       );
-} 
+}
+
+// ---------- New simplified models for UI layer ----------
+class WorkoutSet {
+  final int reps;
+  final double weight;
+
+  const WorkoutSet({required this.reps, required this.weight});
+
+  double get volume => reps * weight;
+}
+
+class WorkoutEntry {
+  final String category;
+  final String exercise;
+  final List<WorkoutSet> sets;
+
+  const WorkoutEntry({
+    required this.category,
+    required this.exercise,
+    required this.sets,
+  });
+
+  double get totalVolume =>
+      sets.fold<double>(0, (sum, s) => sum + s.volume);
+}
+
+/// Temporary in-memory storage before real persistence is wired.
+final List<WorkoutEntry> mockWorkoutEntries = []; 
