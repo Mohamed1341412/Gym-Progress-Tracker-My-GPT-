@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/workout_model.dart';
 import '../utils/volume_calculator.dart';
 import '../services/mock_firestore.dart';
+import '../utils/user_progress.dart';
 
 class WorkoutLogScreen extends StatefulWidget {
   final String exercise;
@@ -29,8 +30,8 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
     });
   }
 
-  List<SetEntry> _collectSets() {
-    final sets = <SetEntry>[];
+  List<WorkoutSet> _collectSets() {
+    final workoutSets = <WorkoutSet>[];
     for (var i = 0; i < _repsControllers.length; i++) {
       final repsText = _repsControllers[i].text;
       final weightText = _weightControllers[i].text;
@@ -38,10 +39,10 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
       final reps = int.tryParse(repsText) ?? 0;
       final weight = double.tryParse(weightText) ?? 0;
       if (reps > 0 && weight > 0) {
-        sets.add(SetEntry(reps: reps, weight: weight));
+        workoutSets.add(WorkoutSet(reps: reps, weight: weight));
       }
     }
-    return sets;
+    return workoutSets;
   }
 
   String _feedback(double volume) {
@@ -53,36 +54,61 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
   Future<void> _saveWorkoutAndExit({required bool endWorkout}) async {
     if (!_formKey.currentState!.validate()) return;
 
-    final sets = _collectSets();
-    if (sets.isEmpty) {
+    final workoutSets = _collectSets();
+    if (workoutSets.isEmpty) {
       ScaffoldMessenger.of(context)
           .showSnackBar(const SnackBar(content: Text('Add at least one set.')));
       return;
     }
 
-    final volume = VolumeCalculator.calculateVolume(sets);
-    final points = VolumeCalculator.calculatePoints(volume);
+    // Build WorkoutEntry to compute volume
+    final entry = WorkoutEntry(
+      category: 'Unknown',
+      exercise: widget.exercise,
+      sets: workoutSets,
+    );
+    final double volume = entry.totalVolume;
 
-    // Save to mock firestore
+    // Points earned based on volume (floor(volume / 1000))
+    final int pointsEarned = (volume / 1000).floor();
+    UserProgress.totalPoints += pointsEarned;
+    final String feedback = _feedback(volume);
+
+    // Save to mock firestore using legacy model for consistency
     final workout = Workout(
       id: '',
       userId: 'mockUser',
       date: DateTime.now(),
       muscleGroup: 'Unknown',
       exerciseName: widget.exercise,
-      sets: sets,
+      sets: workoutSets
+          .map((w) => SetEntry(reps: w.reps, weight: w.weight))
+          .toList(),
       volume: volume,
-      points: points,
+      points: pointsEarned.toDouble(),
     );
     await MockFirestore.instance.saveWorkout(workout);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('${_feedback(volume)} Volume: ${volume.toStringAsFixed(0)}')),
-    );
-
     if (endWorkout) {
+      await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Workout Summary'),
+          content: Text(
+              'Volume: ${volume.toStringAsFixed(0)}\n$feedback\nPoints Earned: $pointsEarned'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
       Navigator.popUntil(context, ModalRoute.withName('/home'));
     } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$feedback Volume: ${volume.toStringAsFixed(0)}')),
+      );
       Navigator.pop(context);
     }
   }
