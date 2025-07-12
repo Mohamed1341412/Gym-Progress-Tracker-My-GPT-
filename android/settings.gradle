@@ -1,0 +1,2 @@
+rootProject.name = 'gym_progress_tracker'
+include ':app' 

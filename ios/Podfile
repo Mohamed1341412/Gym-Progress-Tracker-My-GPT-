@@ -1,0 +1,16 @@
+platform :ios, '11.0'
+
+install! 'cocoapods', :deterministic_uuids => false
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+target 'Runner' do
+  use_frameworks!
+  use_modular_headers!
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end 
