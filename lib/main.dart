@@ -10,6 +10,7 @@ import 'screens/home_screen.dart';
 import 'screens/workout_screen.dart';
 import 'screens/exercise_list_screen.dart';
 import 'screens/workout_log_screen.dart';
+import 'screens/profile_screen.dart';
 import 'services/auth_service.dart';
 
 Future<void> main() async {
@@ -61,6 +62,7 @@ class GymProgressTrackerApp extends StatelessWidget {
             final exercise = ModalRoute.of(context)!.settings.arguments as String;
             return WorkoutLogScreen(exercise: exercise);
           },
+          '/profile': (context) => const ProfileScreen(),
         },
       ),
     );
