@@ -41,26 +41,74 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               _isLoading
                   ? const CircularProgressIndicator()
-                  : ElevatedButton(
-                      onPressed: () async {
-                        setState(() {
-                          _isLoading = true;
-                          _error = null;
-                        });
-                        try {
-                          await auth.signInWithEmail(
-                              _emailController.text, _passwordController.text);
-                        } catch (e) {
-                          setState(() {
-                            _error = e.toString();
-                          });
-                        } finally {
-                          if (mounted) {
-                            setState(() => _isLoading = false);
-                          }
-                        }
-                      },
-                      child: const Text('Login'),
+                  : Column(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            setState(() {
+                              _isLoading = true;
+                              _error = null;
+                            });
+                            try {
+                              await auth.signInWithEmail(_emailController.text,
+                                  _passwordController.text);
+                            } catch (e) {
+                              setState(() {
+                                _error = e.toString();
+                              });
+                            } finally {
+                              if (mounted) {
+                                setState(() => _isLoading = false);
+                              }
+                            }
+                          },
+                          child: const Text('Login with Email'),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.login),
+                          label: const Text('Sign in with Google'),
+                          onPressed: () async {
+                            setState(() {
+                              _isLoading = true;
+                              _error = null;
+                            });
+                            try {
+                              await auth.signInWithGoogle();
+                            } catch (e) {
+                              setState(() {
+                                _error = e.toString();
+                              });
+                            } finally {
+                              if (mounted) {
+                                setState(() => _isLoading = false);
+                              }
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          icon: const Icon(Icons.facebook),
+                          label: const Text('Sign in with Facebook'),
+                          onPressed: () async {
+                            setState(() {
+                              _isLoading = true;
+                              _error = null;
+                            });
+                            try {
+                              await auth.signInWithFacebook();
+                            } catch (e) {
+                              setState(() {
+                                _error = e.toString();
+                              });
+                            } finally {
+                              if (mounted) {
+                                setState(() => _isLoading = false);
+                              }
+                            }
+                          },
+                        ),
+                      ],
                     ),
               TextButton(
                 onPressed: () => Navigator.pushNamed(context, '/signup'),
