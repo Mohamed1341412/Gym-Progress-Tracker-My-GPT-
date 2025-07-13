@@ -14,6 +14,7 @@ import 'screens/profile_screen.dart';
 import 'screens/chat_screen.dart';
 import 'screens/invite_friends_screen.dart';
 import 'screens/leaderboard_screen.dart';
+import 'screens/friend_requests_screen.dart';
 import 'services/auth_service.dart';
 
 Future<void> main() async {
@@ -73,6 +74,7 @@ class GymProgressTrackerApp extends StatelessWidget {
           },
           '/inviteFriends': (context) => const InviteFriendsScreen(),
           '/leaderboard': (context) => const LeaderboardScreen(),
+          '/friendRequests': (context) => const FriendRequestsScreen(),
         },
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/mock_database.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -9,7 +10,6 @@ class FriendsScreen extends StatefulWidget {
 
 class _FriendsScreenState extends State<FriendsScreen> {
   final TextEditingController _searchController = TextEditingController();
-  final List<String> _friends = ['Alice', 'Bob'];
   final List<String> _allUsers = ['Charlie', 'Dave', 'Eve', 'Frank'];
 
   List<String> get _searchResults {
@@ -17,13 +17,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
     if (query.isEmpty) return [];
     return _allUsers
         .where((u) =>
-            u.toLowerCase().contains(query) && !_friends.contains(u))
+            u.toLowerCase().contains(query) && !MockDatabase.friends.contains(u) && !MockDatabase.pendingRequests.contains(u))
         .toList();
   }
 
-  void _addFriend(String name) {
+  void _sendFriendRequest(String name) {
     setState(() {
-      _friends.add(name);
+      if (!MockDatabase.pendingRequests.contains(name)) {
+        MockDatabase.pendingRequests.add(name);
+      }
       _searchController.clear();
     });
   }
@@ -31,7 +33,15 @@ class _FriendsScreenState extends State<FriendsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Friends')),
+      appBar: AppBar(title: const Text('Friends'),
+        actions:[
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: (){
+              Navigator.pushNamed(context, '/friendRequests');
+            },
+          )],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -69,7 +79,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
                     title: Text(name),
                     trailing: IconButton(
                       icon: const Icon(Icons.person_add),
-                      onPressed: () => _addFriend(name),
+                      onPressed: () => _sendFriendRequest(name),
                     ),
                   );
                 },
@@ -83,9 +93,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: _friends.length,
+                itemCount: MockDatabase.friends.length,
                 itemBuilder: (context, index) {
-                  final name = _friends[index];
+                  final name = MockDatabase.friends[index];
                   return ListTile(
                     leading: _avatarForName(name),
                     title: Text(name),
