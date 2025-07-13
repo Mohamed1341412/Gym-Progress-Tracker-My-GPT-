@@ -11,6 +11,7 @@ import 'screens/workout_screen.dart';
 import 'screens/exercise_list_screen.dart';
 import 'screens/workout_log_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/chat_screen.dart';
 import 'services/auth_service.dart';
 
 Future<void> main() async {
@@ -63,6 +64,11 @@ class GymProgressTrackerApp extends StatelessWidget {
             return WorkoutLogScreen(exercise: exercise);
           },
           '/profile': (context) => const ProfileScreen(),
+          '/chat': (context) {
+            final friendName =
+                ModalRoute.of(context)!.settings.arguments as String;
+            return ChatScreen(friendName: friendName);
+          },
         },
       ),
     );
