@@ -67,6 +67,13 @@ class ProfileScreen extends StatelessWidget {
               },
               child: const Text('Invite Friends'),
             ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/leaderboard');
+              },
+              child: const Text('View Leaderboard'),
+            ),
           ],
         ),
       ),
