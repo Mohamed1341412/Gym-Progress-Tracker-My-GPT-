@@ -75,11 +75,13 @@ class WorkoutEntry {
   final String category;
   final String exercise;
   final List<WorkoutSet> sets;
+  final DateTime date;
 
   const WorkoutEntry({
     required this.category,
     required this.exercise,
     required this.sets,
+    required this.date,
   });
 
   double get totalVolume =>

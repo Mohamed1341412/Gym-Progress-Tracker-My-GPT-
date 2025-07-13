@@ -3,6 +3,7 @@ import '../models/workout_model.dart';
 import '../utils/volume_calculator.dart';
 import '../services/mock_firestore.dart';
 import '../utils/user_progress.dart';
+import '../utils/smart_feedback.dart';
 
 class WorkoutLogScreen extends StatefulWidget {
   final String exercise;
@@ -63,10 +64,18 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
 
     // Build WorkoutEntry to compute volume
     final entry = WorkoutEntry(
-      category: 'Unknown',
+      category: widget.exercise,
       exercise: widget.exercise,
       sets: workoutSets,
+      date: DateTime.now(),
     );
+
+    // Store in mock history
+    UserProgress.workoutHistory.add(entry);
+
+    // Smart feedback
+    final aiFeedback = SmartFeedback.generateFeedback(UserProgress.workoutHistory);
+
     final double volume = entry.totalVolume;
 
     // Points earned based on volume (floor(volume / 1000))
@@ -95,7 +104,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
         builder: (context) => AlertDialog(
           title: const Text('Workout Summary'),
           content: Text(
-              'Volume: ${volume.toStringAsFixed(0)}\n$feedback\nPoints Earned: $pointsEarned'),
+              'Volume: ${volume.toStringAsFixed(0)}\n$feedback\nAI: $aiFeedback\nPoints Earned: $pointsEarned'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
