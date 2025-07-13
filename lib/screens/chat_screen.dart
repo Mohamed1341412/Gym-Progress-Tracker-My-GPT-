@@ -1,77 +1,88 @@
 import 'package:flutter/material.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   final String friendName;
   const ChatScreen({Key? key, required this.friendName}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    // Mock chat history – in a real app this would come from a backend
-    final messages = <_Message>[ // newest last
-      _Message(sender: friendName, text: 'Hey, ready for the gym today?'),
-      _Message(sender: 'You', text: 'Absolutely! What time?'),
-      _Message(sender: friendName, text: 'Thinking 6 PM works for me.'),
-      _Message(sender: 'You', text: "Perfect, let's do it!"),
-    ];
+  State<ChatScreen> createState() => _ChatScreenState();
+}
 
+class _ChatScreenState extends State<ChatScreen> {
+  late List<_Message> _messages;
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _messages = [
+      _Message(sender: 'friend', text: 'Hey, ready for the gym today?'),
+      _Message(sender: 'me', text: 'Sure! Let's do it.'),
+    ];
+  }
+
+  void _send() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    setState(() {
+      _messages.add(_Message(sender: 'me', text: text));
+    });
+    _controller.clear();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(friendName)),
+      appBar: AppBar(title: Text(widget.friendName)),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: messages.length,
+              padding: const EdgeInsets.all(12),
+              itemCount: _messages.length,
               itemBuilder: (context, index) {
-                final msg = messages[index];
-                final isMe = msg.sender == 'You';
+                final msg = _messages[index];
+                final isMe = msg.sender == 'me';
                 return Align(
                   alignment:
                       isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
                     margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 10, horizontal: 14),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isMe
-                          ? Colors.blueAccent.shade100
-                          : Colors.grey.shade300,
+                      color: isMe ? Colors.blueAccent : Colors.grey[300],
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(msg.text),
+                    child: Text(
+                      msg.text,
+                      style: TextStyle(
+                          color: isMe ? Colors.white : Colors.black87),
+                    ),
                   ),
                 );
               },
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(color: Colors.grey.shade200),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    enabled: false, // disabled – mock only
-                    decoration: InputDecoration(
-                      hintText: 'Type a message… (mock)',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration:
+                          const InputDecoration(hintText: 'Type a message...'),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Sending is disabled in mock')),
-                    );
-                  },
-                ),
-              ],
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _send,
+                  ),
+                ],
+              ),
             ),
-          ),
+          )
         ],
       ),
     );

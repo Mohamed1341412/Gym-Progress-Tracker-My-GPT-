@@ -68,9 +68,8 @@ class GymProgressTrackerApp extends StatelessWidget {
           },
           '/profile': (context) => const ProfileScreen(),
           '/chat': (context) {
-            final friendName =
-                ModalRoute.of(context)!.settings.arguments as String;
-            return ChatScreen(friendName: friendName);
+            final name = ModalRoute.of(context)!.settings.arguments as String;
+            return ChatScreen(friendName: name);
           },
           '/inviteFriends': (context) => const InviteFriendsScreen(),
           '/leaderboard': (context) => const LeaderboardScreen(),

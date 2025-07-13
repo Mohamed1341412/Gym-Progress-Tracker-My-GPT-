@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/mock_database.dart';
+import '../screens/chat_screen.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -9,25 +10,8 @@ class FriendsScreen extends StatefulWidget {
 }
 
 class _FriendsScreenState extends State<FriendsScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  final List<String> _allUsers = ['Charlie', 'Dave', 'Eve', 'Frank'];
-
-  List<String> get _searchResults {
-    final query = _searchController.text.trim().toLowerCase();
-    if (query.isEmpty) return [];
-    return _allUsers
-        .where((u) =>
-            u.toLowerCase().contains(query) && !MockDatabase.friends.contains(u) && !MockDatabase.pendingRequests.contains(u))
-        .toList();
-  }
-
-  void _sendFriendRequest(String name) {
-    setState(() {
-      if (!MockDatabase.pendingRequests.contains(name)) {
-        MockDatabase.pendingRequests.add(name);
-      }
-      _searchController.clear();
-    });
+  void _openChat(String name) {
+    Navigator.pushNamed(context, '/chat', arguments: name);
   }
 
   @override
@@ -45,69 +29,27 @@ class _FriendsScreenState extends State<FriendsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search username or ID',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    setState(() {
-                      _searchController.clear();
-                    });
-                  },
-                ),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 12),
-            if (_searchResults.isNotEmpty) ...[
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text('Search Results',
-                    style: Theme.of(context).textTheme.titleSmall),
-              ),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: _searchResults.length,
-                itemBuilder: (context, index) {
-                  final name = _searchResults[index];
-                  return ListTile(
-                    leading: _avatarForName(name),
-                    title: Text(name),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.person_add),
-                      onPressed: () => _sendFriendRequest(name),
-                    ),
-                  );
-                },
-              ),
-              const Divider(),
-            ],
-            Align(
-              alignment: Alignment.centerLeft,
-              child:
-                  Text('Your Friends', style: Theme.of(context).textTheme.titleSmall),
-            ),
+            Text('Your Friends', style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 8),
             Expanded(
-              child: ListView.builder(
-                itemCount: MockDatabase.friends.length,
-                itemBuilder: (context, index) {
-                  final name = MockDatabase.friends[index];
-                  return ListTile(
-                    leading: _avatarForName(name),
-                    title: Text(name),
-                    trailing: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/chat', arguments: name);
+              child: MockDatabase.friends.isEmpty
+                  ? const Center(child: Text('No friends yet.'))
+                  : ListView.builder(
+                      itemCount: MockDatabase.friends.length,
+                      itemBuilder: (context, index) {
+                        final name = MockDatabase.friends[index];
+                        return ListTile(
+                          leading: _avatarForName(name),
+                          title: Text(name),
+                          trailing: ElevatedButton(
+                            onPressed: () => _openChat(name),
+                            child: const Text('Message'),
+                          ),
+                        );
                       },
-                      child: const Text('Message'),
                     ),
-                  );
-                },
-              ),
             ),
           ],
         ),
@@ -123,7 +65,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
   @override
   void dispose() {
-    _searchController.dispose();
     super.dispose();
   }
 } 
