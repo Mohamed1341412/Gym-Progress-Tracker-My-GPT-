@@ -60,6 +60,13 @@ class ProfileScreen extends StatelessWidget {
               onPressed: () {},
               child: const Text('Security Settings'),
             ),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/inviteFriends');
+              },
+              child: const Text('Invite Friends'),
+            ),
           ],
         ),
       ),
