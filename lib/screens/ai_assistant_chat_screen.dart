@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../utils/user_progress.dart';
+import '../models/workout_model.dart';
 
 class AiAssistantChatScreen extends StatefulWidget {
   const AiAssistantChatScreen({Key? key}) : super(key: key);
@@ -14,7 +16,51 @@ class _AiAssistantChatScreenState extends State<AiAssistantChatScreen> {
   final TextEditingController _controller = TextEditingController();
 
   String _mockAiResponse(String prompt) {
-    return "I'm still learning. Try again later!";
+    final lower = prompt.toLowerCase();
+
+    // 1. Suggest muscle group to train
+    if (lower.contains('what should i train')) {
+      if (UserProgress.workoutHistory.isEmpty) {
+        return 'You have no logged workouts yet. How about starting with a full-body routine?';
+      }
+      // Determine the category not trained for the longest time
+      final Map<String, DateTime> lastTrained = {};
+      for (final w in UserProgress.workoutHistory) {
+        lastTrained[w.category] = lastTrained.containsKey(w.category)
+            ? (w.date.isAfter(lastTrained[w.category]!) ? w.date : lastTrained[w.category]!)
+            : w.date;
+      }
+      // Find oldest date
+      String? targetCat;
+      int maxDays = -1;
+      final now = DateTime.now();
+      lastTrained.forEach((cat, date) {
+        final days = now.difference(date).inDays;
+        if (days > maxDays) {
+          maxDays = days;
+          targetCat = cat;
+        }
+      });
+      if (targetCat != null) {
+        if (maxDays >= 7) {
+          return "It's been $maxDays days since your last $targetCat workout. Let's hit $targetCat today!";
+        }
+        return 'Your most balanced option today would be $targetCat.';
+      }
+    }
+
+    // 2. Volume dropping question
+    if (lower.contains('why is my volume dropping')) {
+      return 'You may be overtraining or not recovering enough. Try reducing sets slightly or adding rest.';
+    }
+
+    // 3. Workout plan request
+    if (lower.contains('make me a workout plan')) {
+      return 'Here's a simple 3-day split:\n• Day 1: Push (Chest, Shoulders, Triceps)\n• Day 2: Pull (Back, Biceps)\n• Day 3: Legs';
+    }
+
+    // Default fallback
+    return "I'm still learning. Try asking about your progress, recovery, or training schedule.";
   }
 
   void _send() {
