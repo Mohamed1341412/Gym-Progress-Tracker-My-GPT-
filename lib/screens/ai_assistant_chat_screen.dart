@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/user_progress.dart';
 import '../models/workout_model.dart';
+import 'package:intl/intl.dart';
 
 class AiAssistantChatScreen extends StatefulWidget {
   const AiAssistantChatScreen({Key? key}) : super(key: key);
@@ -10,8 +11,14 @@ class AiAssistantChatScreen extends StatefulWidget {
 }
 
 class _AiAssistantChatScreenState extends State<AiAssistantChatScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   final List<Map<String, String>> _messages = [
-    {'sender': 'ai', 'text': "Hi, I'm GPT! Ask me anything about your training, progress, or what you should work on today 💪"},
+    {
+      'sender': 'ai',
+      'text': "Hi, I'm GPT! Ask me anything about your training, progress, or what you should work on today 💪",
+      'time': DateTime.now().toIso8601String(),
+    },
   ];
   final TextEditingController _controller = TextEditingController();
 
@@ -67,14 +74,36 @@ class _AiAssistantChatScreenState extends State<AiAssistantChatScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     setState(() {
-      _messages.add({'sender': 'user', 'text': text});
+      _messages.add({
+        'sender': 'user',
+        'text': text,
+        'time': DateTime.now().toIso8601String(),
+      });
       _controller.clear();
     });
+    _scrollToBottom();
     // Simulate AI response after short delay
     Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
-        _messages.add({'sender': 'ai', 'text': _mockAiResponse(text)});
+        _messages.add({
+          'sender': 'ai',
+          'text': _mockAiResponse(text),
+          'time': DateTime.now().toIso8601String(),
+        });
+        _scrollToBottom();
       });
+    });
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
     });
   }
 
@@ -86,25 +115,51 @@ class _AiAssistantChatScreenState extends State<AiAssistantChatScreen> {
         children: [
           Expanded(
             child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.all(12),
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final msg = _messages[index];
                 final isUser = msg['sender'] == 'user';
-                return Align(
-                  alignment:
-                      isUser ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isUser ? Colors.grey[300] : Colors.lightBlue[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      msg['text'] ?? '',
-                      style: const TextStyle(color: Colors.black87),
-                    ),
+                final time = DateTime.tryParse(msg['time'] ?? '') ?? DateTime.now();
+                final timeStr = DateFormat('h:mm a').format(time);
+
+                return TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 300),
+                  builder: (context, value, child) => Opacity(
+                    opacity: value,
+                    child: child,
+                  ),
+                  child: Column(
+                    crossAxisAlignment:
+                        isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    children: [
+                      Text(isUser ? 'You' : 'GPT',
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500)),
+                      Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isUser
+                              ? Colors.grey[300]
+                              : Colors.blueAccent.shade100,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          msg['text'] ?? '',
+                          style: const TextStyle(color: Colors.black87),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Text(timeStr,
+                            style: TextStyle(fontSize: 10, color: Colors.grey[500])),
+                      ),
+                    ],
                   ),
                 );
               },
