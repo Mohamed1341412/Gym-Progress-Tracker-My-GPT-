@@ -26,6 +26,10 @@ class HomeScreen extends StatelessWidget {
         title: const Text('Choose a Category'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.smart_toy),
+            onPressed: () => Navigator.pushNamed(context, '/aiChat'),
+          ),
+          IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
               Navigator.pushNamed(context, '/profile');
