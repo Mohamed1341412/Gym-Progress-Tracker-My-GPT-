@@ -1,22 +1,20 @@
+import '../models/training_method.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
-
-class _Category {
-  final String name;
-  final IconData icon;
-  _Category(this.name, this.icon);
-}
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
-  static final _categories = <_Category>[
-    _Category('Push', Icons.push_pin),
-    _Category('Pull', Icons.anchor),
-    _Category('Legs', Icons.directions_run),
-    _Category('Chest', Icons.fitness_center),
-    _Category('Back', Icons.back_hand),
-    _Category('Shoulders', Icons.accessibility_new),
-    _Category('Arms', Icons.pan_tool),
+  static final _methods = [
+    TrainingMethod.push,
+    TrainingMethod.pull,
+    TrainingMethod.legs,
+    TrainingMethod.chest,
+    TrainingMethod.back,
+    TrainingMethod.shoulders,
+    TrainingMethod.arms,
+    TrainingMethod.abs,
+    TrainingMethod.cardio,
   ];
 
   @override
@@ -53,17 +51,13 @@ class HomeScreen extends StatelessWidget {
             crossAxisSpacing: 16,
             childAspectRatio: 1.0,
           ),
-          itemCount: _categories.length,
+          itemCount: _methods.length,
           itemBuilder: (context, index) {
-            final category = _categories[index];
+            final method = _methods[index];
             return _CategoryCard(
-              category: category,
+              method: method,
               onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  '/exerciseList',
-                  arguments: category.name,
-                );
+                context.push('/exercise/${method.name}');
               },
             );
           },
@@ -74,9 +68,9 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _CategoryCard extends StatelessWidget {
-  final _Category category;
+  final TrainingMethod method;
   final VoidCallback onTap;
-  const _CategoryCard({Key? key, required this.category, required this.onTap})
+  const _CategoryCard({Key? key, required this.method, required this.onTap})
       : super(key: key);
 
   @override
@@ -98,10 +92,10 @@ class _CategoryCard extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(category.icon, size: 48, color: Colors.indigo),
+              Icon(method.icon, size: 48, color: Colors.indigo),
               const SizedBox(height: 12),
               Text(
-                category.name,
+                method.displayName,
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ],

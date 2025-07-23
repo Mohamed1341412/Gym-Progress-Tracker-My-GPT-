@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import '../models/training_method.dart';
+import 'package:go_router/go_router.dart';
 
 class ExerciseListScreen extends StatefulWidget {
-  final String category;
-  const ExerciseListScreen({Key? key, required this.category}) : super(key: key);
+  final TrainingMethod method;
+  const ExerciseListScreen({Key? key, required this.method}) : super(key: key);
 
   @override
   State<ExerciseListScreen> createState() => _ExerciseListScreenState();
@@ -25,7 +27,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
   void initState() {
     super.initState();
     _exercises = List<String>.from(
-        _defaultExercises[widget.category] ?? const <String>[]);
+        _defaultExercises[widget.method.displayName] ?? const <String>[]);
   }
 
   void _addExercise() async {
@@ -64,7 +66,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('${widget.category} Exercises')),
+      appBar: AppBar(title: Text('${widget.method.displayName} Exercises')),
       floatingActionButton: FloatingActionButton(
         onPressed: _addExercise,
         child: const Icon(Icons.add),
@@ -77,11 +79,7 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
             title: Text(exercise),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/workoutLog',
-                arguments: exercise,
-              );
+              context.push('/workoutLog/$exercise');
             },
           );
         },
