@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class CarouselItem {
   final String title;
@@ -21,6 +22,7 @@ class GlassCarousel extends StatefulWidget {
 class _GlassCarouselState extends State<GlassCarousel> {
   final _controller = CarouselController();
   int _current = 0;
+  final _tapPlayer = AudioCache(prefix: 'assets/sounds/');
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +66,7 @@ class _CarouselCardState extends State<_CarouselCard> with SingleTickerProviderS
   void dispose() { _ctrl.dispose(); super.dispose(); }
 
   void _toggle() {
+    _tapPlayer.play('card_click.mp3');
     setState(() => _flipped = !_flipped);
     _flipped ? _ctrl.forward() : _ctrl.reverse();
   }
