@@ -4,6 +4,9 @@ import '../services/mock_database.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'dart:io';
+import '../services/chat_service.dart';
+import '../models/chat_message.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatScreen extends StatefulWidget {
   final String friendName;
@@ -14,20 +17,24 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  late List<_Message> _messages;
+  List<ChatMessage> _messages = [];
   final TextEditingController _controller = TextEditingController();
   Friend? _friend;
   bool _showEmoji = false;
   final _picker = ImagePicker();
+  late ChatService _chatService;
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _friend = MockDatabase.friends.firstWhere((f)=>f.name==widget.friendName, orElse: ()=> Friend(name: widget.friendName, countryCode: 'US'));
-    _messages = [
-      _Message(sender: 'friend', text: 'Hey, ready for the gym today?', status: MsgStatus.read),
-      _Message(sender: 'me', text: 'Sure! Let\'s do it.', status: MsgStatus.read),
-    ];
+    final uid = FirebaseAuth.instance.currentUser?.uid ?? 'mockUser';
+    _chatService = ChatService(uid);
+    _chatService.messagesStream(widget.friendName).listen((list){
+      setState(()=> _messages = list);
+      _scrollToBottom();
+    });
   }
 
   void _send() {
@@ -170,7 +177,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final x = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 50);
     if(x==null) return;
     setState(() {
-      _messages.add(_Message(sender:'me', imageUrl: x.path));
+      _chatService.sendImage(widget.friendName, File(x.path));
     });
     _scrollToBottom();
   }
