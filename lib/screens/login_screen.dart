@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -107,6 +108,20 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                             }
                           },
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            if (_emailController.text.isEmpty) return;
+                            await context
+                                .read<AuthService>()
+                                .sendPasswordReset(_emailController.text);
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Password-reset link sent')),
+                              );
+                            }
+                          },
+                          child: const Text('Forgot password?'),
                         ),
                       ],
                     ),
