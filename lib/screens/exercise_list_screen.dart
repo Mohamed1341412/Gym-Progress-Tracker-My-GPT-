@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/training_method.dart';
 import 'package:go_router/go_router.dart';
+import '../widgets/glass_carousel.dart';
 
 class ExerciseListScreen extends StatefulWidget {
   final TrainingMethod method;
@@ -12,6 +13,7 @@ class ExerciseListScreen extends StatefulWidget {
 
 class _ExerciseListScreenState extends State<ExerciseListScreen> {
   late List<String> _exercises;
+  final TextEditingController _searchCtrl = TextEditingController();
 
   static const Map<String, List<String>> _defaultExercises = {
     'Push': ['Bench Press', 'Overhead Press', 'Tricep Dips', 'Wrist Curl', 'Reverse Wrist Curl'],
@@ -71,21 +73,37 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
         onPressed: _addExercise,
         child: const Icon(Icons.add),
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(8),
-        itemBuilder: (context, index) {
-          final exercise = _exercises[index];
-          return ListTile(
-            title: Text(exercise),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              context.push('/workoutLog/$exercise');
-            },
-          );
-        },
-        separatorBuilder: (context, index) => const Divider(),
-        itemCount: _exercises.length,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              controller: _searchCtrl,
+              decoration: const InputDecoration(
+                hintText: 'Search exercise',
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ),
+          Expanded(
+            child: GlassCarousel(
+              items: _exercises
+                  .where((e) => e.toLowerCase().contains(_searchCtrl.text.toLowerCase()))
+                  .map((name) => CarouselItem(
+                      title: name,
+                      imageUrl: 'https://via.placeholder.com/400x300?text=$name',
+                      onTap: () => context.push('/workoutLog/$name')))
+                  .toList(),
+            ),
+          ),
+        ],
       ),
     );
+  }
+  @override
+  void dispose(){
+    _searchCtrl.dispose();
+    super.dispose();
   }
 } 
