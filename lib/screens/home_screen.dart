@@ -1,6 +1,7 @@
 import '../models/training_method.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
+import '../widgets/feedback_banner.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -35,33 +36,40 @@ class HomeScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blueAccent, Colors.indigo],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+      body: Column(
+        children: [
+          const FeedbackBanner(),
+          Expanded(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blueAccent, Colors.indigo],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 1.0,
+                ),
+                itemCount: _methods.length,
+                itemBuilder: (context, index) {
+                  final method = _methods[index];
+                  return _CategoryCard(
+                    method: method,
+                    onTap: () {
+                      context.push('/exercise/${method.name}');
+                    },
+                  );
+                },
+              ),
+            ),
           ),
-        ),
-        child: GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 16,
-            crossAxisSpacing: 16,
-            childAspectRatio: 1.0,
-          ),
-          itemCount: _methods.length,
-          itemBuilder: (context, index) {
-            final method = _methods[index];
-            return _CategoryCard(
-              method: method,
-              onTap: () {
-                context.push('/exercise/${method.name}');
-              },
-            );
-          },
-        ),
+        ],
       ),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),

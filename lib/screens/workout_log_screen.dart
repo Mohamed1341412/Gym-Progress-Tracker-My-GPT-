@@ -75,6 +75,7 @@ class _WorkoutLogScreenState extends State<WorkoutLogScreen> {
 
     // Smart feedback
     final aiFeedback = SmartFeedback.generateFeedback(UserProgress.workoutHistory);
+    UserProgress.latestFeedback.value = aiFeedback;
 
     final double volume = entry.totalVolume;
 
