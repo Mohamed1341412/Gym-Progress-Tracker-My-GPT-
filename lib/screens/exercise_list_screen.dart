@@ -14,13 +14,13 @@ class _ExerciseListScreenState extends State<ExerciseListScreen> {
   late List<String> _exercises;
 
   static const Map<String, List<String>> _defaultExercises = {
-    'Push': ['Bench Press', 'Overhead Press', 'Tricep Dips'],
-    'Pull': ['Pull Ups', 'Barbell Row', 'Bicep Curl'],
+    'Push': ['Bench Press', 'Overhead Press', 'Tricep Dips', 'Wrist Curl', 'Reverse Wrist Curl'],
+    'Pull': ['Pull Ups', 'Barbell Row', 'Bicep Curl', 'Forearm Curl', 'Reverse Forearm Curl'],
     'Legs': ['Squat', 'Deadlift', 'Lunges'],
     'Chest': ['Flat Bench', 'Incline Dumbbell', 'Cable Fly'],
     'Back': ['Lat Pulldown', 'Seated Row', 'Good Morning'],
     'Shoulders': ['Military Press', 'Lateral Raise', 'Face Pull'],
-    'Arms': ['Bicep Curl', 'Tricep Pushdown', 'Hammer Curl'],
+    'Arms': ['Bicep Curl', 'Tricep Pushdown', 'Hammer Curl', 'Wrist Curl', 'Forearm Curl'],
   };
 
   @override
