@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/friend_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/friend_model.dart';
+import 'package:badges/badges.dart' as badges;
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -22,12 +23,17 @@ class _FriendsScreenState extends State<FriendsScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Friends'),
         actions:[
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: (){
-              Navigator.pushNamed(context, '/friendRequests');
-            },
-          )],
+          StreamBuilder<List<Friend>>(stream: service.requestsStream(), builder: (c,s){
+            final count = s.data?.length ?? 0;
+            return badges.Badge(
+              showBadge: count>0,
+              badgeContent: Text('$count', style: const TextStyle(color: Colors.white, fontSize: 10)),
+              child: IconButton(
+                icon: const Icon(Icons.notifications),
+                onPressed: () => Navigator.pushNamed(context, '/friendRequests'),
+              ),
+            );
+          })],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
