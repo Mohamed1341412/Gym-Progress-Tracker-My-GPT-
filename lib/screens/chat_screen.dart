@@ -17,7 +17,6 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  List<ChatMessage> _messages = [];
   final TextEditingController _controller = TextEditingController();
   Friend? _friend;
   bool _showEmoji = false;
@@ -31,36 +30,24 @@ class _ChatScreenState extends State<ChatScreen> {
     _friend = MockDatabase.friends.firstWhere((f)=>f.name==widget.friendName, orElse: ()=> Friend(name: widget.friendName, countryCode: 'US'));
     final uid = FirebaseAuth.instance.currentUser?.uid ?? 'mockUser';
     _chatService = ChatService(uid);
-    _chatService.messagesStream(widget.friendName).listen((list){
-      setState(()=> _messages = list);
-      _scrollToBottom();
-    });
   }
 
   void _send() {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
-    setState(() {
-      _messages.add(_Message(sender: 'me', text: text));
-    });
+    _chatService.sendText(widget.friendName, text);
     _controller.clear();
     _scrollToBottom();
   }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final double itemHeight = 50; // Approximate height of a message bubble
-        final double listHeight = MediaQuery.of(context).size.height -
-            AppBar().preferredSize.height -
-            MediaQuery.of(context).padding.top -
-            MediaQuery.of(context).padding.bottom -
-            200; // Subtract padding and space for input field
-        final double offset = _messages.length * itemHeight;
-        if (offset > listHeight) {
-          _scrollController.animateTo(offset,
-              duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
-        }
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
       }
     });
   }
@@ -104,31 +91,39 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final msg = _messages[index];
-                final isMe = msg.sender == 'me';
-                return Align(
-                  alignment:
-                      isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isMe ? Colors.blueAccent : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children:[
-                        if(msg.text!=null) Text(msg.text!, style: TextStyle(color: isMe?Colors.white:Colors.black87)),
-                        if(msg.imageUrl!=null) Padding(padding: const EdgeInsets.only(top:4), child: Image.file(File(msg.imageUrl!), width:150)),
-                      ]
-                    ),
-                  ),
-                  if(isMe) Icon(_statusIcon(msg.status), size:14, color: Colors.grey[600]),
+            child: StreamBuilder<List<ChatMessage>>(
+              stream: _chatService.messagesStream(widget.friendName),
+              builder: (context, snapshot){
+                final msgs = snapshot.data ?? [];
+                WidgetsBinding.instance.addPostFrameCallback((_)=> _scrollToBottom());
+                return ListView.builder(
+                  controller: _scrollController,
+                  padding: const EdgeInsets.all(12),
+                  itemCount: msgs.length,
+                  itemBuilder: (context, index){
+                    final msg = msgs[index];
+                    final isUser = msg.senderUid == FirebaseAuth.instance.currentUser?.uid;
+                    return Align(
+                      alignment:
+                          isUser ? Alignment.centerRight : Alignment.centerLeft,
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isUser ? Colors.blueAccent : Colors.grey[300],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:[
+                            if(msg.text!=null) Text(msg.text!, style: TextStyle(color: isUser?Colors.white:Colors.black87)),
+                            if(msg.imageUrl!=null) Padding(padding: const EdgeInsets.only(top:4), child: Image.file(File(msg.imageUrl!), width:150)),
+                          ]
+                        ),
+                      ),
+                      if(isUser) Icon(_statusIcon(msg.status), size:14, color: Colors.grey[600]),
+                    );
+                  },
                 );
               },
             ),
