@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/mock_database.dart';
-import '../screens/chat_screen.dart';
+import '../services/friend_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/friend_model.dart';
 
 class FriendsScreen extends StatefulWidget {
@@ -14,6 +14,8 @@ class _FriendsScreenState extends State<FriendsScreen> {
   void _openChat(String name) {
     Navigator.pushNamed(context, '/chat', arguments: name);
   }
+
+  final service = FriendService();
 
   @override
   Widget build(BuildContext context) {
@@ -35,37 +37,38 @@ class _FriendsScreenState extends State<FriendsScreen> {
             Text('Your Friends', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
             Expanded(
-              child: MockDatabase.friends.isEmpty
-                  ? const Center(child: Text('No friends yet.'))
-                  : ListView.builder(
-                      itemCount: MockDatabase.friends.length,
-                      itemBuilder: (context, index) {
-                        final friend = MockDatabase.friends[index];
-                        return ListTile(
-                          leading: Text(friend.flagEmoji, style: const TextStyle(fontSize: 24)),
-                          title: Text(friend.name),
-                          subtitle: Text(friend.online ? 'Online' : 'Last seen ${friend.lastSeen.hour}:${friend.lastSeen.minute}'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () => _openChat(friend.name),
-                                child: const Text('Message'),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                tooltip: 'Unfriend',
-                                onPressed: () {
-                                  setState(() {
-                                    MockDatabase.friends.removeAt(index);
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+              child: StreamBuilder<List<Friend>>(
+                stream: service.friendsStream(),
+                builder: (context, snapshot){
+                  if(snapshot.connectionState==ConnectionState.waiting){
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  final data = snapshot.data ?? [];
+                  if(data.isEmpty){
+                    return const Center(child: Text('No friends yet.'));
+                  }
+                  return ListView.builder(
+                    itemCount: data.length,
+                    itemBuilder: (context, index){
+                      final friend = data[index];
+                      return ListTile(
+                        leading: Text(friend.flagEmoji, style: const TextStyle(fontSize: 24)),
+                        title: Text(friend.name),
+                        subtitle: Text(friend.online ? 'Online' : 'Last seen ${friend.lastSeen.hour}:${friend.lastSeen.minute}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () => _openChat(friend.name),
+                              child: const Text('Message'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
