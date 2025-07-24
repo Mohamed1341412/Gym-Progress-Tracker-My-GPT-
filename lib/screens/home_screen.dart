@@ -63,6 +63,14 @@ class HomeScreen extends StatelessWidget {
           },
         ),
       ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: ElevatedButton.icon(
+          onPressed: () => context.push('/bodyweight'),
+          icon: const Icon(Icons.accessibility_new),
+          label: const Text('Bodyweight & Cardio'),
+        ),
+      ),
     );
   }
 }

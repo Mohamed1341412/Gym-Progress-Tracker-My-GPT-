@@ -21,6 +21,7 @@ import 'screens/training_program_selector_screen.dart';
 import '../models/training_program.dart';
 import 'screens/program_muscle_map_screen.dart';
 import 'screens/custom_workout_creator_screen.dart';
+import 'screens/bodyweight_cardio_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -97,6 +98,7 @@ class GymProgressTrackerApp extends StatelessWidget {
         return ProgramMuscleMapScreen(program: p);
       }),
       GoRoute(path: '/customWorkout/new', builder: (c,s)=> const CustomWorkoutCreatorScreen()),
+      GoRoute(path: '/bodyweight', builder: (c,s)=> const BodyweightAndCardioScreen()),
     ],
   );
 }
