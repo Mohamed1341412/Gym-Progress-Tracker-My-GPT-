@@ -1,3 +1,5 @@
+enum FriendStatus { pending, accepted, blocked }
+
 class Friend {
   String name;
   String countryCode; // e.g., 'US', 'EG'
@@ -5,6 +7,7 @@ class Friend {
   DateTime lastSeen;
   bool muted;
   bool blocked;
+  FriendStatus status;
 
   Friend({
     required this.name,
@@ -13,6 +16,7 @@ class Friend {
     DateTime? lastSeen,
     this.muted = false,
     this.blocked = false,
+    this.status = FriendStatus.pending,
   }) : lastSeen = lastSeen ?? DateTime.now();
 
   String get flagEmoji {
