@@ -19,6 +19,7 @@ import 'screens/friend_requests_screen.dart';
 import 'screens/ai_assistant_chat_screen.dart';
 import 'screens/training_program_selector_screen.dart';
 import '../models/training_program.dart';
+import 'screens/program_muscle_map_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,6 +90,10 @@ class GymProgressTrackerApp extends StatelessWidget {
         final p = TrainingProgram.values.byName(s.params['prog']!);
         // For now navigate to Home or muscle map placeholder
         return ExerciseListScreen(method: TrainingMethod.chest); // placeholder
+      }),
+      GoRoute(path: '/muscles/:prog', builder: (c,s){
+        final p = TrainingProgram.values.byName(s.params['prog']!);
+        return ProgramMuscleMapScreen(program: p);
       }),
     ],
   );
