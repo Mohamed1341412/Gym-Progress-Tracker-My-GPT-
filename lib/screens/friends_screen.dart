@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/mock_database.dart';
 import '../screens/chat_screen.dart';
+import '../models/friend_model.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({Key? key}) : super(key: key);
@@ -39,13 +40,28 @@ class _FriendsScreenState extends State<FriendsScreen> {
                   : ListView.builder(
                       itemCount: MockDatabase.friends.length,
                       itemBuilder: (context, index) {
-                        final name = MockDatabase.friends[index];
+                        final friend = MockDatabase.friends[index];
                         return ListTile(
-                          leading: _avatarForName(name),
-                          title: Text(name),
-                          trailing: ElevatedButton(
-                            onPressed: () => _openChat(name),
-                            child: const Text('Message'),
+                          leading: Text(friend.flagEmoji, style: const TextStyle(fontSize: 24)),
+                          title: Text(friend.name),
+                          subtitle: Text(friend.online ? 'Online' : 'Last seen ${friend.lastSeen.hour}:${friend.lastSeen.minute}'),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () => _openChat(friend.name),
+                                child: const Text('Message'),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                tooltip: 'Unfriend',
+                                onPressed: () {
+                                  setState(() {
+                                    MockDatabase.friends.removeAt(index);
+                                  });
+                                },
+                              ),
+                            ],
                           ),
                         );
                       },

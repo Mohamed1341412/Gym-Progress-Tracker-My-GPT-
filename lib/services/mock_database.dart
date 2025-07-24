@@ -1,4 +1,9 @@
+import '../models/friend_model.dart';
+
 class MockDatabase {
-  static List<String> friends = ['Alice', 'Bob'];
-  static List<String> pendingRequests = [];
+  static List<Friend> friends = [
+    Friend(name: 'Alice', countryCode: 'US', online: true),
+    Friend(name: 'Bob', countryCode: 'GB', online: false),
+  ];
+  static List<Friend> pendingRequests = [];
 } 
