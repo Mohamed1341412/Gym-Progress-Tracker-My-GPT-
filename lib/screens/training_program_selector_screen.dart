@@ -13,7 +13,13 @@ class TrainingProgramSelectorScreen extends StatelessWidget {
         .map((p) => CarouselItem(
               title: p.displayName,
               imageUrl: p.imageUrl,
-              onTap: () => context.go('/muscles/${p.name}'),
+              onTap: () {
+                if (p == TrainingProgram.custom) {
+                  context.go('/customWorkout/new');
+                } else {
+                  context.go('/muscles/${p.name}');
+                }
+              },
             ))
         .toList();
 
