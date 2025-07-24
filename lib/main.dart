@@ -3,6 +3,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
+import 'package:go_router/go_router.dart';
 
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -16,7 +17,8 @@ import 'screens/invite_friends_screen.dart';
 import 'screens/leaderboard_screen.dart';
 import 'screens/friend_requests_screen.dart';
 import 'screens/ai_assistant_chat_screen.dart';
-import 'services/auth_service.dart';
+import 'screens/training_program_selector_screen.dart';
+import '../models/training_program.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +43,7 @@ class GymProgressTrackerApp extends StatelessWidget {
           initialData: null,
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'Gym Progress Tracker',
         theme: ThemeData(
           useMaterial3: true,
@@ -52,34 +54,44 @@ class GymProgressTrackerApp extends StatelessWidget {
           Locale('ar'),
         ],
         locale: const Locale('en'),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const _AuthWrapper(),
-          '/login': (context) => const LoginScreen(),
-          '/signup': (context) => const SignUpScreen(),
-          '/home': (context) => const HomeScreen(),
-          '/workout': (context) => const WorkoutScreen(),
-          '/exerciseList': (context) {
-            final category = ModalRoute.of(context)!.settings.arguments as String;
-            return ExerciseListScreen(category: category);
-          },
-          '/workoutLog': (context) {
-            final exercise = ModalRoute.of(context)!.settings.arguments as String;
-            return WorkoutLogScreen(exercise: exercise);
-          },
-          '/profile': (context) => const ProfileScreen(),
-          '/chat': (context) {
-            final name = ModalRoute.of(context)!.settings.arguments as String;
-            return ChatScreen(friendName: name);
-          },
-          '/inviteFriends': (context) => const InviteFriendsScreen(),
-          '/leaderboard': (context) => const LeaderboardScreen(),
-          '/friendRequests': (context) => const FriendRequestsScreen(),
-          '/aiChat': (context) => const AiAssistantChatScreen(),
-        },
+        initialLocation: '/choose',
+        routerConfig: _routerConfig,
       ),
     );
   }
+
+  final GoRouter _routerConfig = GoRouter(
+    routes: [
+      GoRoute(path: '/', builder: (c,s)=> const _AuthWrapper()),
+      GoRoute(path: '/login', builder: (c,s)=> const LoginScreen()),
+      GoRoute(path: '/signup', builder: (c,s)=> const SignUpScreen()),
+      GoRoute(path: '/home', builder: (c,s)=> const HomeScreen()),
+      GoRoute(path: '/workout', builder: (c,s)=> const WorkoutScreen()),
+      GoRoute(path: '/exerciseList', builder: (c,s){
+        final category = ModalRoute.of(c.context)!.settings.arguments as String;
+        return ExerciseListScreen(category: category);
+      }),
+      GoRoute(path: '/workoutLog', builder: (c,s){
+        final exercise = ModalRoute.of(c.context)!.settings.arguments as String;
+        return WorkoutLogScreen(exercise: exercise);
+      }),
+      GoRoute(path: '/profile', builder: (c,s)=> const ProfileScreen()),
+      GoRoute(path: '/chat', builder: (c,s){
+        final name = ModalRoute.of(c.context)!.settings.arguments as String;
+        return ChatScreen(friendName: name);
+      }),
+      GoRoute(path: '/inviteFriends', builder: (c,s)=> const InviteFriendsScreen()),
+      GoRoute(path: '/leaderboard', builder: (c,s)=> const LeaderboardScreen()),
+      GoRoute(path: '/friendRequests', builder: (c,s)=> const FriendRequestsScreen()),
+      GoRoute(path: '/aiChat', builder: (c,s)=> const AiAssistantChatScreen()),
+      GoRoute(path: '/choose', builder: (c,s)=> const TrainingProgramSelectorScreen()),
+      GoRoute(path: '/program/:prog', builder: (c, s){
+        final p = TrainingProgram.values.byName(s.params['prog']!);
+        // For now navigate to Home or muscle map placeholder
+        return ExerciseListScreen(method: TrainingMethod.chest); // placeholder
+      }),
+    ],
+  );
 }
 
 class _AuthWrapper extends StatelessWidget {
